@@ -1,0 +1,100 @@
+<html>
+<head>
+    <meta meta content="text/html; charset=utf-8" http-equiv="content-type">
+    <title>test</title>
+</head>
+
+<p id="title">点击按钮则调用callAndroid函数</p>
+<br/>
+<button type="button" style="height:50px;width:50px" id="button1" onclick="testClick1()"></button>
+<br/>
+<button type="button" style="height:50px;width:50px" id="button2" title="11" onclick=""></button>
+<br/>
+<p> 打开摄像头:</p>
+<input type="file" id="camerafile" capture="camera"/>
+<br/>
+<p>打开相册:</p>
+<input type="file" id="photofile"  accept="image/*"/>
+
+</body>
+
+<script>
+         function changeText(){
+            document.getElementById('title').innerHTML = 'haha修改了';
+         }
+
+         function testClick1() {
+            //call native method
+            window.WebViewJavascriptBridge.callHandler(
+                'openScan'
+                , {'param': '中文测试'}
+                , function(responseData) {
+                    document.getElementById('title').innerHTML = 'haha修改了'+responseData;
+                }
+            );
+        }
+
+        function connectWebViewJavascriptBridge(callback) {
+            if (window.WebViewJavascriptBridge) {
+                callback(WebViewJavascriptBridge)
+            } else {
+                document.addEventListener(
+                    'WebViewJavascriptBridgeReady'
+                    , function() {
+                        callback(WebViewJavascriptBridge)
+                    },
+                    false
+                );
+            }
+        }
+
+        function setupWebViewJavascriptBridge(callback) {
+        var u = navigator.userAgent;
+        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;//android终端
+        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);//ios终端
+        if(isiOS){
+            if (window.WebViewJavascriptBridge) { return callback(WebViewJavascriptBridge); }
+            if (window.WVJBCallbacks) { return window.WVJBCallbacks.push(callback); }
+            window.WVJBCallbacks = [callback];
+            var WVJBIframe = document.createElement('iframe');
+            WVJBIframe.style.display = 'none';
+            WVJBIframe.src = 'https://__bridge_loaded__';
+            document.documentElement.appendChild(WVJBIframe);
+            setTimeout(function() { document.documentElement.removeChild(WVJBIframe) }, 0)
+        }else if(isAndroid){
+            if (window.WebViewJavascriptBridge) {
+                    callback(WebViewJavascriptBridge)
+                } else {
+                    document.addEventListener(
+                            'WebViewJavascriptBridgeReady'
+                            , function() {
+                            callback(WebViewJavascriptBridge)
+                            },
+                            false
+                            );
+                }
+        }
+
+    }
+
+        setupWebViewJavascriptBridge(function(bridge) {
+            bridge.init(function(message, responseCallback) {
+                console.log('JS got a message', message);
+                var data = {
+                    'Javascript Responds': '测试中文!'
+                };
+                console.log('JS responding with', data);
+                responseCallback(data);
+            });
+             console.log('here'+'here');
+            bridge.registerHandler('functionInJs', function(data, responseCallback) {
+                document.getElementById('title').innerHTML = ("data from Java: = " + data);
+                var responseData = "Javascript Says Right back aka!";
+                responseCallback(responseData);
+            });
+            console.log('finish'+'here');
+        });
+
+
+      </script>
+</html>

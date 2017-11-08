@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="padding_top">0dp</dimen>
+    <dimen name="mar_45">45dp</dimen>
+    <dimen name="sp_14">14sp</dimen>
+</resources>
